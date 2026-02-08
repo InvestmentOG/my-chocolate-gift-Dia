@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>For Dia: The Exclusive Collection</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Quicksand:wght@400;600;700&family=Sacramento&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        :root {
+            --bg-grad-1: #fff0f5; /* Lavender Blush */
+            --bg-grad-2: #ffdee9; /* Light Pink */
+            --primary: #d6336c;   /* Deep Pink */
+            --accent: #ff8fab;    /* Soft Pink */
+            --gold: #ffc857;
+            --text: #495057;
+            --frame-color: #ff9eb5;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background: radial-gradient(circle at 50% 50%, var(--bg-grad-1), var(--bg-grad-2));
+            height: 100vh;
+            overflow: hidden;
+            color: var(--text);
+        }
+
+        /* --- HEART RAIN BACKGROUND --- */
+        .heart-rain {
+            position: fixed; top: -10vh;
+            font-size: 1.5rem; color: rgba(255, 182, 193, 0.6);
+            z-index: 0; pointer-events: none;
+            animation: fall linear infinite;
+        }
+        @keyframes fall {
+            to { transform: translateY(110vh) rotate(360deg); }
+        }
+
+        /* --- STYLES FOR PINK FRAMING --- */
+        .framed-image {
+            border: 6px solid var(--frame-color);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15), inset 0 0 20px rgba(255,255,255,0.2);
+            background: #000;
+            object-fit: cover;
+        }
+
+        #app {
+            position: relative; width: 100%; height: 100%; z-index: 10;
+            display: flex; justify-content: center; align-items: center;
+            perspective: 1000px;
+        }
+
+        .view {
+            position: absolute; width: 100%; height: 100%;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            opacity: 0; pointer-events: none;
+            transform-style: preserve-3d;
+        }
+        .view.active { opacity: 1; pointer-events: all; }
+
+        /* INTRO */
+        .start-btn {
+            padding: 20px 50px; font-size: 1.4rem;
+            font-family: 'Cinzel', serif; font-weight: 700;
+            background: white; color: var(--primary);
+            border: 4px solid var(--accent); border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 10px 25px rgba(214, 51, 108, 0.3);
+            transition: transform 0.2s;
+        }
+        .start-btn:hover { transform: scale(1.1); }
+
+        /* BASKET */
+        .basket-img {
+            width: 300px;
+            cursor: pointer;
+            border: 8px solid white;
+            outline: 6px solid var(--accent);
+            border-radius: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            transition: transform 0.3s;
+            z-index: 5;
+            animation: pulse-basket 3s infinite ease-in-out;
+        }
+        @keyframes pulse-basket { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.03); } }
+
+        /* CHOCOLATES */
+        #scatter-area { position: relative; width: 100%; height: 100%; }
+        .chocolate-item {
+            position: absolute; width: 110px; height: 110px;
+            cursor: pointer;
+            z-index: 50;
+            border-radius: 20px;
+            border: 4px solid var(--frame-color);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            object-fit: cover;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: floaty 4s infinite ease-in-out;
+        }
+        .chocolate-item:hover { 
+            transform: scale(1.2) rotate(5deg) !important; 
+            z-index: 100; border-color: var(--primary);
+        }
+        @keyframes floaty { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+
+        /* REVEAL CARD */
+        #stage-container { position: relative; width: 340px; height: 450px; perspective: 2000px; }
+        .card-inner {
+            position: relative; width: 100%; height: 100%;
+            text-align: center; transition: transform 0.8s;
+            transform-style: preserve-3d;
+        }
+        .wrapper-img { 
+            position: absolute; top: 50%; left: 50%; 
+            transform: translate(-50%, -50%) translateZ(50px); 
+            width: 250px; border-radius: 20px;
+            border: 5px solid white; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            backface-visibility: hidden;
+        }
+        .reveal-photo {
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%;
+            object-fit: cover;
+            border-radius: 20px;
+            border: 10px solid white;
+            outline: 5px solid var(--accent);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+            backface-visibility: hidden;
+            transform: rotateY(180deg);
+        }
+
+        /* --- CHARACTER (PRANAY) --- */
+        #pranay-container {
+            position: absolute; 
+            bottom: 20px; right: 20px;
+            width: 170px; height: 170px; z-index: 200;
+            cursor: pointer;
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        /* Fidget Animation */
+        .bunny-body {
+            width: 100%; height: 85%; background: white;
+            border-radius: 50% 50% 45% 45% / 60% 60% 40% 40%;
+            position: absolute; bottom: 0;
+            box-shadow: inset -5px -5px 15px rgba(0,0,0,0.05), 0 10px 25px rgba(0,0,0,0.15);
+            transform-origin: bottom center;
+            animation: fidget 5s infinite ease-in-out;
+        }
+        @keyframes fidget {
+            0%, 100% { transform: rotate(0deg) scale(1); }
+            33% { transform: rotate(-3deg) scale(1.02, 0.98); }
+            66% { transform: rotate(3deg) scale(0.98, 1.02); }
+        }
+
+        .ear {
+            position: absolute; width: 28%; height: 55%;
+            background: white; border-radius: 50% 50% 0 0;
+            top: -40%; transform-origin: bottom center;
+            border: 2px solid #fff0f5; border-bottom: none;
+        }
+        .ear.left { left: 15%; transform: rotate(-10deg); }
+        .ear.right { right: 15%; transform: rotate(10deg); }
+        .ear-inner {
+            position: absolute; bottom: 15%; left: 50%; transform: translateX(-50%);
+            width: 60%; height: 70%; background: var(--accent); border-radius: 20px; opacity: 0.4;
+        }
+
+        .face { position: absolute; top: 40%; width: 100%; text-align: center; }
+        .eyes { display: flex; justify-content: center; gap: 36px; margin-bottom: 10px; }
+        .eye { width: 14px; height: 14px; background: #3e3e3e; border-radius: 50%; transition: all 0.2s; }
+        .eye.wink { transform: scaleY(0.1); }
+        .eye.happy { border-radius: 50%; border-bottom: 3px solid #3e3e3e; background: transparent; height: 8px; width: 14px; transform: translateY(-4px); }
+        
+        .cheeks { position: absolute; top: 50%; width: 100%; display: flex; justify-content: center; gap: 65px; }
+        .cheek { width: 20px; height: 12px; background: #ffadad; border-radius: 50%; opacity: 0; transition: opacity 0.3s; }
+        .cheek.blush { opacity: 0.6; }
+
+        .mouth {
+            width: 10px; height: 6px; border-bottom: 3px solid #3e3e3e; border-radius: 0 0 10px 10px;
+            margin: 0 auto; transition: all 0.2s;
+        }
+        .mouth.laugh { width: 18px; height: 14px; background: #551a1a; border-radius: 0 0 20px 20px; border: none; }
+
+        /* SPEECH BUBBLE */
+        .speech-bubble {
+            position: absolute; 
+            bottom: 190px; right: 10px; 
+            background: rgba(255, 255, 255, 0.95);
+            padding: 18px 25px;
+            border-radius: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border: 2px solid var(--accent);
+            min-width: 220px; max-width: 300px;
+            font-size: 1rem; font-weight: 600; color: var(--text);
+            opacity: 0; transform: scale(0.8);
+            pointer-events: none;
+            transition: all 0.3s;
+            z-index: 210;
+        }
+        .speech-bubble.visible { opacity: 1; transform: scale(1); pointer-events: all; }
+        
+        /* THE NEW BIG RED BUTTON */
+        .bubble-btn {
+            display: block; margin-top: 15px; width: 100%;
+            background: #ff4757; /* Brighter Red/Pink */
+            color: white; border: none; padding: 15px;
+            border-radius: 15px; cursor: pointer; 
+            font-family: 'Quicksand'; font-weight: 700; font-size: 1.1rem;
+            box-shadow: 0 5px 15px rgba(255, 71, 87, 0.4);
+            animation: pulse-btn 2s infinite;
+        }
+        @keyframes pulse-btn { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+
+        /* FINALE */
+        #finale-view h1 {
+            font-family: 'Sacramento', cursive; color: var(--primary); font-size: 3.5rem;
+            text-align: center; margin-bottom: 40px; line-height: 1.2;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        #heart-collage { width: 320px; height: 320px; position: relative; }
+        .collage-img {
+            position: absolute; width: 90px; height: 90px;
+            object-fit: cover; border-radius: 50%;
+            border: 4px solid white; box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        /* PROGRESS HEARTS */
+        #progress-container {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            display: flex; gap: 8px; z-index: 100;
+        }
+        .prog-heart { font-size: 1.2rem; opacity: 0.3; transition: all 0.5s; }
+        .prog-heart.active { opacity: 1; transform: scale(1.3); filter: drop-shadow(0 0 5px var(--primary)); }
+    </style>
+</head>
+<body>
+
+    <audio id="bg-music" loop src="basketsong.m4a"></audio>
+    
+    <div id="rain-container"></div>
+
+    <div id="app">
+        <div id="intro-view" class="view active">
+            <button class="start-btn" onclick="startExperience()">Enter Dia's World ❤️</button>
+        </div>
+
+        <div id="basket-view" class="view">
+            <img src="basket.jpg" class="basket-img" id="basket-el" alt="Basket">
+        </div>
+
+        <div id="scatter-view" class="view">
+            <div id="scatter-area"></div>
+        </div>
+
+        <div id="detail-view" class="view">
+            <div id="stage-container">
+                <div class="card-inner" id="card-inner">
+                    <img id="stage-wrapper" class="wrapper-img" src="">
+                    <img id="stage-photo" class="reveal-photo" src="">
+                </div>
+            </div>
+        </div>
+
+        <div id="finale-view" class="view">
+            <h1>Happy Chocolate Day<br>Dia ❤️</h1>
+            <div id="heart-collage"></div>
+        </div>
+    </div>
+
+    <div id="progress-container">
+        <div class="prog-heart">❤️</div><div class="prog-heart">❤️</div>
+        <div class="prog-heart">❤️</div><div class="prog-heart">❤️</div>
+        <div class="prog-heart">❤️</div><div class="prog-heart">❤️</div>
+        <div class="prog-heart">❤️</div>
+    </div>
+
+    <div id="pranay-container" onclick="interactCharacter()">
+        <div class="speech-bubble" id="bubble">
+            <span id="bubble-text">...</span>
+            <div id="bubble-actions"></div>
+        </div>
+        
+        <div class="bunny-body">
+            <div class="ear left"><div class="ear-inner"></div></div>
+            <div class="ear right"><div class="ear-inner"></div></div>
+            <div class="face">
+                <div class="cheeks">
+                    <div class="cheek" id="cheek-1"></div><div class="cheek" id="cheek-2"></div>
+                </div>
+                <div class="eyes">
+                    <div class="eye" id="eye-l"></div><div class="eye" id="eye-r"></div>
+                </div>
+                <div class="mouth" id="mouth"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA & CONFIG ---
+        const chocolates = [
+            { id: 'ferrero', img: 'ferrero.jpg', photo: 'eyespic.jpg', audio: 'ferrero.m4a', slogan: 'Golden Eyes', text: "Just like the gold foil, your eyes have a sparkle that hypnotizes me." },
+            { id: 'silk', img: 'silk.jpg', photo: 'smilepic.jpg', audio: 'silk.m4a', slogan: 'Smooth Love', text: "I'd go any distance for this smile. It's the smoothest curve in the world." },
+            { id: 'kinder', img: 'kinder.jpg', photo: 'visualspic.jpg', audio: 'kinder.m4a', slogan: 'Pure Joy', text: "You have that rare aesthetic. You are the whole mood." },
+            { id: 'kitkat', img: 'kitkat.jpg', photo: 'voicepic.jpg', audio: 'kitkat.m4a', slogan: 'My Break', text: "Your voice is my break from reality. The only melody I need." },
+            { id: 'munch', img: 'munch.jpg', photo: 'laughpic.jpg', audio: 'munch.m4a', slogan: 'The Crunch', text: "That crunch of happiness! Your laugh cures my bad days instantly." },
+            { id: 'milkybar', img: 'milkybar.jpg', photo: 'baddiepic.jpg', audio: 'milkybar.m4a', slogan: 'Main Character', text: "That confidence, the style... You don't just walk into a room; you own it." },
+            { id: '5star', img: '5star.jpg', photo: 'hugspic.jpg', audio: '5star.m4a', slogan: 'Lost in You', text: "I didn't get a 5 star or a hug... but I'm working towards them! 😉" }
+        ];
+
+        const cuteJokes = [
+            "You're sweeter than the chocolate! 🍫",
+            "Stop poking me, I'm ticklish! 🤭",
+            "Are you a magician? Everyone else disappears when I see you. ✨",
+            "I love you more than carrots! 🥕",
+            "Can I get a hug? 🥺",
+            "I'd share my chocolate with you... maybe. 🤪",
+            "You glow brighter than my phone screen at 3AM! 🌟",
+            "Is your name Wi-Fi? Because I'm feeling a connection! 📶",
+            "My heart does a bunny hop when I see you! 🐰",
+            "You're the marshmallow to my hot cocoa! ☕",
+            "Don't tell the others, but you're my favorite human. 🤫",
+            "Click a chocolate! I'm hungry! 🍫",
+            "You look 5-Star today! ⭐"
+        ];
+
+        // --- STATE ---
+        let opened = new Set();
+        let currentAudio = null;
+        let isAnimating = false;
+        // NEW: Remember which chocolate is currently open
+        let currentActiveChocolate = null; 
+
+        // --- DOM ELEMENTS ---
+        const bgMusic = document.getElementById('bg-music');
+        const character = document.getElementById('pranay-container');
+        const bubble = document.getElementById('bubble');
+        const bubbleText = document.getElementById('bubble-text');
+        const bubbleActions = document.getElementById('bubble-actions');
+
+        // --- HEART RAIN EFFECT ---
+        function createRain() {
+            const container = document.getElementById('rain-container');
+            const heart = document.createElement('div');
+            heart.classList.add('heart-rain');
+            heart.innerText = Math.random() > 0.5 ? '❤️' : '💖';
+            heart.style.left = Math.random() * 100 + 'vw';
+            heart.style.animationDuration = (Math.random() * 3 + 3) + 's';
+            heart.style.opacity = Math.random() * 0.5 + 0.2;
+            container.appendChild(heart);
+            setTimeout(() => heart.remove(), 6000);
+        }
+        setInterval(createRain, 300);
+
+        // --- TELEPORT LOGIC ---
+        let currentPosIndex = 0; 
+        
+        function teleportCharacter() {
+            const positions = [
+                { bottom: '20px', right: '20px', left: 'auto', top: 'auto', bubbleBot: '190px', bubbleRight: '10px', bubbleLeft: 'auto' }, // BR
+                { bottom: '20px', left: '20px', right: 'auto', top: 'auto', bubbleBot: '190px', bubbleLeft: '10px', bubbleRight: 'auto' }, // BL
+                { top: '80px', right: '20px', left: 'auto', bottom: 'auto', bubbleBot: '-150px', bubbleRight: '10px', bubbleLeft: 'auto' }, // TR
+                { top: '80px', left: '20px', right: 'auto', bottom: 'auto', bubbleBot: '-150px', bubbleLeft: '10px', bubbleRight: 'auto' }  // TL
+            ];
+
+            let nextIndex;
+            do {
+                nextIndex = Math.floor(Math.random() * positions.length);
+            } while (nextIndex === currentPosIndex);
+            
+            currentPosIndex = nextIndex;
+            const pos = positions[currentPosIndex];
+
+            gsap.to(character, { scale: 0, duration: 0.2, onComplete: () => {
+                character.style.bottom = pos.bottom;
+                character.style.top = pos.top;
+                character.style.left = pos.left;
+                character.style.right = pos.right;
+                
+                bubble.style.bottom = pos.bubbleBot;
+                bubble.style.left = pos.bubbleLeft;
+                bubble.style.right = pos.bubbleRight;
+
+                gsap.to(character, { scale: 1, duration: 0.3, ease: "back.out(1.7)" });
+            }});
+        }
+
+        // --- AUDIO ENGINE ---
+        function playTrack(path) {
+            gsap.to(bgMusic, { volume: 0, duration: 0.5, onComplete: () => bgMusic.pause() });
+
+            if(currentAudio) { currentAudio.pause(); currentAudio = null; }
+            
+            currentAudio = new Audio(path);
+            currentAudio.loop = true;
+            currentAudio.volume = 0;
+            currentAudio.play().catch(e => console.log("Audio play failed: " + e));
+            gsap.to(currentAudio, { volume: 1, duration: 1 });
+        }
+
+        function restoreBgMusic() {
+            if(currentAudio) {
+                gsap.to(currentAudio, { volume: 0, duration: 0.5, onComplete: () => {
+                    currentAudio.pause();
+                    currentAudio = null;
+                }});
+            }
+            bgMusic.play();
+            gsap.to(bgMusic, { volume: 0.5, duration: 2 });
+        }
+
+        // --- INTERACTION ---
+        function say(text, buttons = null) {
+            bubbleText.innerHTML = text;
+            bubbleActions.innerHTML = '';
+            
+            if(buttons) {
+                const btn = document.createElement('button');
+                btn.className = 'bubble-btn';
+                btn.innerText = buttons.text;
+                btn.onclick = (e) => { e.stopPropagation(); buttons.action(); };
+                bubbleActions.appendChild(btn);
+            }
+            bubble.classList.add('visible');
+        }
+
+        function hideBubble() {
+            bubble.classList.remove('visible');
+        }
+
+        function setEmotion(type) {
+            const eyes = document.querySelectorAll('.eye');
+            const mouth = document.getElementById('mouth');
+            const cheeks = document.querySelectorAll('.cheek');
+
+            eyes.forEach(e => e.className = 'eye');
+            mouth.className = 'mouth';
+            cheeks.forEach(c => c.classList.remove('blush'));
+
+            if (type === 'happy') {
+                eyes.forEach(e => e.classList.add('happy'));
+                mouth.classList.add('laugh');
+                cheeks.forEach(c => c.classList.add('blush'));
+            } else if (type === 'wink') {
+                document.getElementById('eye-r').classList.add('wink');
+                mouth.classList.add('laugh');
+            } else if (type === 'shy') {
+                cheeks.forEach(c => c.classList.add('blush'));
+                mouth.style.width = '5px';
+            }
+        }
+
+        function interactCharacter() {
+            teleportCharacter();
+            
+            confetti({
+                particleCount: 20, spread: 50,
+                origin: { x: 0.5, y: 0.5 },
+                shapes: ['star'], colors: ['#FFD700', '#FF69B4', '#FFF']
+            });
+
+            const r = Math.random();
+            const joke = cuteJokes[Math.floor(Math.random() * cuteJokes.length)];
+            
+            setTimeout(() => {
+                say(joke);
+                if (r < 0.3) setEmotion('happy');
+                else if (r < 0.6) setEmotion('wink');
+                else setEmotion('shy');
+            }, 300);
+
+            setTimeout(() => {
+                setEmotion('normal');
+                
+                // --- FIX: Check if we need to restore the BACK BUTTON ---
+                const detailView = document.getElementById('detail-view');
+                if (detailView.classList.contains('active') && currentActiveChocolate) {
+                    // If we are looking at a chocolate, bring back the description and button!
+                    showNote(currentActiveChocolate);
+                } else {
+                    // Otherwise, just hide the bubble normally
+                    if(!document.querySelector('.bubble-btn')) hideBubble();
+                }
+            }, 3500);
+        }
+
+        // --- TRANSITIONS ---
+        function switchView(viewId) {
+            if(isAnimating) return;
+            isAnimating = true;
+
+            const current = document.querySelector('.view.active');
+            const next = document.getElementById(viewId);
+
+            const tl = gsap.timeline({
+                onComplete: () => {
+                    current.classList.remove('active');
+                    isAnimating = false;
+                }
+            });
+
+            if (current) {
+                tl.to(current, { opacity: 0, scale: 0.9, filter: "blur(10px)", duration: 0.8 });
+            }
+
+            next.classList.add('active');
+            gsap.set(next, { opacity: 0, scale: 1.1, filter: "blur(10px)" });
+
+            tl.to(next, { opacity: 1, scale: 1, filter: "blur(0px)", duration: 0.8 }, "-=0.6");
+        }
+
+        // --- GAME LOGIC ---
+
+        function startExperience() {
+            bgMusic.volume = 0.5;
+            bgMusic.play().catch(e=>console.log("Interaction needed"));
+            
+            document.getElementById('intro-view').style.opacity = 0;
+            setTimeout(() => document.getElementById('intro-view').style.display='none', 1000);
+
+            gsap.to(character, { bottom: '20px', right: '20px', duration: 1.2, ease: "back.out(1.7)" });
+            
+            setTimeout(() => {
+                say("Hi! I'm Pranay, your personal Chocolate Store Guide! 🎩", {
+                    text: "Hi Pranay! 👋", 
+                    action: () => {
+                        setEmotion('happy');
+                        say("I've hidden 7 special surprises for you. Ready?", {
+                            text: "Let's Go! 🚀", 
+                            action: showBasket
+                        });
+                    }
+                });
+                setEmotion('wink');
+            }, 1000);
+        }
+
+        function showBasket() {
+            switchView('basket-view');
+            say("Tap this magic basket to begin! 🧺");
+            
+            const basket = document.getElementById('basket-el');
+            basket.onclick = () => {
+                gsap.to(basket, { x: -10, duration: 0.05, yoyo: true, repeat: 10, onComplete: explodeBasket });
+            }
+        }
+
+        function explodeBasket() {
+            const flash = document.createElement('div');
+            flash.style.cssText = "position:fixed;top:0;left:0;width:100%;height:100%;background:white;z-index:999;pointer-events:none;";
+            document.body.appendChild(flash);
+            gsap.to(flash, { opacity: 0, duration: 1, onComplete: () => flash.remove() });
+
+            switchView('scatter-view');
+            placeChocolates();
+            teleportCharacter();
+            
+            setTimeout(() => say("Ooooh! Pick a treat to discover a memory! 🍬"), 1000);
+        }
+
+        function placeChocolates() {
+            const area = document.getElementById('scatter-area');
+            area.innerHTML = '';
+
+            chocolates.forEach((choco, index) => {
+                const el = document.createElement('img');
+                el.src = choco.img;
+                el.className = 'chocolate-item';
+                
+                let top, left;
+                if(index === 6) { // Center
+                    top = 50; left = 50;
+                } else {
+                    const angle = (index / 6) * Math.PI * 2;
+                    left = 50 + 35 * Math.cos(angle);
+                    top = 50 + 35 * Math.sin(angle);
+                }
+
+                el.style.left = `calc(${left}% - 55px)`;
+                el.style.top = `calc(${top}% - 55px)`;
+                el.onclick = () => openChocolate(choco);
+                
+                gsap.fromTo(el, { scale: 0, rotation: -180 }, { scale: 1, rotation: 0, duration: 0.8, delay: 0.1 * index, ease: "back.out(1.5)" });
+                area.appendChild(el);
+            });
+        }
+
+        function openChocolate(choco) {
+            // FIX: Store the current chocolate
+            currentActiveChocolate = choco;
+
+            playTrack(choco.audio);
+            switchView('detail-view');
+
+            const card = document.getElementById('card-inner');
+            const wrapper = document.getElementById('stage-wrapper');
+            const photo = document.getElementById('stage-photo');
+
+            gsap.set(card, { rotationY: 0 });
+            gsap.set(wrapper, { opacity: 1 });
+            gsap.set(photo, { opacity: 0 });
+            
+            wrapper.src = choco.img;
+            photo.src = choco.photo;
+
+            gsap.to(character, { bottom: '-250px', duration: 0.5 });
+            
+            setTimeout(() => {
+                gsap.to(card, { rotationY: 180, duration: 1.2, ease: "power2.inOut" });
+                gsap.to(wrapper, { opacity: 0, duration: 0.5, delay: 0.3 });
+                gsap.to(photo, { opacity: 1, duration: 0.5, delay: 0.3 });
+
+                confetti({ particleCount: 100, spread: 60, origin: { y: 0.4 } });
+
+                setTimeout(() => {
+                    teleportCharacter(); 
+                    setEmotion('happy');
+                    showNote(choco);
+                }, 1500);
+            }, 800);
+        }
+
+        function showNote(choco) {
+            if(!opened.has(choco.id)) {
+                opened.add(choco.id);
+                document.querySelectorAll('.prog-heart').forEach((h, i) => {
+                    if(i < opened.size) h.classList.add('active');
+                });
+            }
+            say(`<b>${choco.slogan}</b><br>${choco.text}`, { text: "Let's Go Back ↩️", action: goBack });
+        }
+
+        function goBack() {
+            // FIX: Clear the active chocolate when leaving
+            currentActiveChocolate = null;
+            
+            restoreBgMusic();
+            if(opened.size === 7) {
+                startFinale();
+            } else {
+                switchView('scatter-view');
+                hideBubble();
+                teleportCharacter();
+                say("Which one next? 😋");
+            }
+        }
+
+        function startFinale() {
+            switchView('finale-view');
+            const collage = document.getElementById('heart-collage');
+            collage.innerHTML = '';
+
+            const duration = 3000;
+            const end = Date.now() + duration;
+            (function frame() {
+                confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 } });
+                confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 } });
+                if (Date.now() < end) requestAnimationFrame(frame);
+            }());
+
+            chocolates.forEach((c, i) => {
+                const img = document.createElement('img');
+                img.src = c.photo;
+                img.className = 'collage-img';
+                const angle = (i / 7) * Math.PI * 2;
+                img.style.left = (110 + 100 * Math.cos(angle)) + 'px';
+                img.style.top = (110 + 100 * Math.sin(angle)) + 'px';
+                gsap.from(img, { scale: 0, duration: 0.8, delay: i*0.15, ease: "elastic.out(1, 0.5)" });
+                collage.appendChild(img);
+            });
+
+            say("Happy Chocolate Day My Love! You are the sweetest! ❤️");
+            setEmotion('love');
+        }
+    </script>
+</body>
+</html>
