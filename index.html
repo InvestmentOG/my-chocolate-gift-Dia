@@ -140,9 +140,7 @@
         #pranay-container {
             position: absolute; 
             bottom: 20px; right: 20px;
-            /* SIZE HALVED: 170px -> 85px */
-            width: 85px; height: 85px; 
-            z-index: 200;
+            width: 170px; height: 170px; z-index: 200;
             cursor: pointer;
             transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
@@ -175,33 +173,32 @@
         }
 
         .face { position: absolute; top: 40%; width: 100%; text-align: center; }
-        .eyes { display: flex; justify-content: center; gap: 18px; /* Adjusted for size */ margin-bottom: 5px; }
-        .eye { width: 7px; height: 7px; /* Adjusted for size */ background: #3e3e3e; border-radius: 50%; transition: all 0.2s; }
+        .eyes { display: flex; justify-content: center; gap: 36px; margin-bottom: 10px; }
+        .eye { width: 14px; height: 14px; background: #3e3e3e; border-radius: 50%; transition: all 0.2s; }
         .eye.wink { transform: scaleY(0.1); }
-        .eye.happy { border-radius: 50%; border-bottom: 2px solid #3e3e3e; background: transparent; height: 4px; width: 7px; transform: translateY(-2px); }
+        .eye.happy { border-radius: 50%; border-bottom: 3px solid #3e3e3e; background: transparent; height: 8px; width: 14px; transform: translateY(-4px); }
         
-        .cheeks { position: absolute; top: 50%; width: 100%; display: flex; justify-content: center; gap: 32px; /* Adjusted for size */ }
-        .cheek { width: 10px; height: 6px; /* Adjusted for size */ background: #ffadad; border-radius: 50%; opacity: 0; transition: opacity 0.3s; }
+        .cheeks { position: absolute; top: 50%; width: 100%; display: flex; justify-content: center; gap: 65px; }
+        .cheek { width: 20px; height: 12px; background: #ffadad; border-radius: 50%; opacity: 0; transition: opacity 0.3s; }
         .cheek.blush { opacity: 0.6; }
 
         .mouth {
-            width: 5px; height: 3px; /* Adjusted for size */ border-bottom: 2px solid #3e3e3e; border-radius: 0 0 5px 5px;
+            width: 10px; height: 6px; border-bottom: 3px solid #3e3e3e; border-radius: 0 0 10px 10px;
             margin: 0 auto; transition: all 0.2s;
         }
-        .mouth.laugh { width: 9px; height: 7px; background: #551a1a; border-radius: 0 0 10px 10px; border: none; }
+        .mouth.laugh { width: 18px; height: 14px; background: #551a1a; border-radius: 0 0 20px 20px; border: none; }
 
         /* SPEECH BUBBLE */
         .speech-bubble {
             position: absolute; 
-            /* Adjusted for half-size bunny */
-            bottom: 100px; right: -60px; 
+            bottom: 190px; right: 10px; 
             background: rgba(255, 255, 255, 0.95);
-            padding: 15px 20px;
+            padding: 18px 25px;
             border-radius: 25px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             border: 2px solid var(--accent);
-            min-width: 200px; max-width: 280px;
-            font-size: 0.95rem; font-weight: 600; color: var(--text);
+            min-width: 220px; max-width: 300px;
+            font-size: 1rem; font-weight: 600; color: var(--text);
             opacity: 0; transform: scale(0.8);
             pointer-events: none;
             transition: all 0.3s;
@@ -211,11 +208,11 @@
         
         /* THE NEW BIG RED BUTTON */
         .bubble-btn {
-            display: block; margin-top: 10px; width: 100%;
-            background: #ff4757;
-            color: white; border: none; padding: 12px;
+            display: block; margin-top: 15px; width: 100%;
+            background: #ff4757; /* Brighter Red/Pink */
+            color: white; border: none; padding: 15px;
             border-radius: 15px; cursor: pointer; 
-            font-family: 'Quicksand'; font-weight: 700; font-size: 1rem;
+            font-family: 'Quicksand'; font-weight: 700; font-size: 1.1rem;
             box-shadow: 0 5px 15px rgba(255, 71, 87, 0.4);
             animation: pulse-btn 2s infinite;
         }
@@ -223,39 +220,15 @@
 
         /* FINALE */
         #finale-view h1 {
-            font-family: 'Sacramento', cursive; color: var(--primary); font-size: 3rem;
-            text-align: center; margin-bottom: 20px; line-height: 1.2;
+            font-family: 'Sacramento', cursive; color: var(--primary); font-size: 3.5rem;
+            text-align: center; margin-bottom: 40px; line-height: 1.2;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
         }
-        
-        #finale-content {
-            position: relative;
-            width: 340px; height: 340px;
-            display: flex; justify-content: center; align-items: center;
-        }
-
-        /* The Sketch */
-        #finale-sketch {
-            width: 180px; height: auto;
-            max-height: 250px;
-            border-radius: 15px;
-            border: 6px solid white;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
-            z-index: 5;
-            object-fit: contain;
-        }
-
-        /* The Ring of Hearts */
-        #heart-collage { 
-            position: absolute; top: 0; left: 0;
-            width: 100%; height: 100%; 
-            pointer-events: none;
-        }
+        #heart-collage { width: 320px; height: 320px; position: relative; }
         .collage-img {
-            position: absolute; width: 70px; height: 70px;
+            position: absolute; width: 90px; height: 90px;
             object-fit: cover; border-radius: 50%;
-            border: 3px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            z-index: 2;
+            border: 4px solid white; box-shadow: 0 10px 20px rgba(0,0,0,0.1);
         }
 
         /* PROGRESS HEARTS */
@@ -297,10 +270,7 @@
 
         <div id="finale-view" class="view">
             <h1>Happy Chocolate Day<br>Dia ❤️</h1>
-            <div id="finale-content">
-                <img src="sketch.jpg" id="finale-sketch" alt="Our Sketch">
-                <div id="heart-collage"></div>
-            </div>
+            <div id="heart-collage"></div>
         </div>
     </div>
 
@@ -364,6 +334,7 @@
         let opened = new Set();
         let currentAudio = null;
         let isAnimating = false;
+        // NEW: Remember which chocolate is currently open
         let currentActiveChocolate = null; 
 
         // --- DOM ELEMENTS ---
@@ -387,18 +358,15 @@
         }
         setInterval(createRain, 300);
 
-        // --- TELEPORT LOGIC (Adjusted for small bunny) ---
+        // --- TELEPORT LOGIC ---
         let currentPosIndex = 0; 
         
         function teleportCharacter() {
             const positions = [
-                // Bottom positions (Bubble above) - Offset Adjusted for 85px Height
-                { bottom: '20px', right: '20px', left: 'auto', top: 'auto', bubbleBot: '100px', bubbleRight: '-50px', bubbleLeft: 'auto' }, 
-                { bottom: '20px', left: '20px', right: 'auto', top: 'auto', bubbleBot: '100px', bubbleLeft: '-50px', bubbleRight: 'auto' }, 
-                
-                // Top positions (Bubble below)
-                { top: '80px', right: '20px', left: 'auto', bottom: 'auto', bubbleBot: '-120px', bubbleRight: '-50px', bubbleLeft: 'auto' }, 
-                { top: '80px', left: '20px', right: 'auto', bottom: 'auto', bubbleBot: '-120px', bubbleLeft: '-50px', bubbleRight: 'auto' }
+                { bottom: '20px', right: '20px', left: 'auto', top: 'auto', bubbleBot: '190px', bubbleRight: '10px', bubbleLeft: 'auto' }, // BR
+                { bottom: '20px', left: '20px', right: 'auto', top: 'auto', bubbleBot: '190px', bubbleLeft: '10px', bubbleRight: 'auto' }, // BL
+                { top: '80px', right: '20px', left: 'auto', bottom: 'auto', bubbleBot: '-150px', bubbleRight: '10px', bubbleLeft: 'auto' }, // TR
+                { top: '80px', left: '20px', right: 'auto', bottom: 'auto', bubbleBot: '-150px', bubbleLeft: '10px', bubbleRight: 'auto' }  // TL
             ];
 
             let nextIndex;
@@ -484,7 +452,7 @@
                 mouth.classList.add('laugh');
             } else if (type === 'shy') {
                 cheeks.forEach(c => c.classList.add('blush'));
-                mouth.style.width = '3px'; // Adjusted for small size
+                mouth.style.width = '5px';
             }
         }
 
@@ -510,11 +478,13 @@
             setTimeout(() => {
                 setEmotion('normal');
                 
-                // Restoring Back Button Logic
+                // --- FIX: Check if we need to restore the BACK BUTTON ---
                 const detailView = document.getElementById('detail-view');
                 if (detailView.classList.contains('active') && currentActiveChocolate) {
+                    // If we are looking at a chocolate, bring back the description and button!
                     showNote(currentActiveChocolate);
                 } else {
+                    // Otherwise, just hide the bubble normally
                     if(!document.querySelector('.bubble-btn')) hideBubble();
                 }
             }, 3500);
@@ -622,6 +592,7 @@
         }
 
         function openChocolate(choco) {
+            // FIX: Store the current chocolate
             currentActiveChocolate = choco;
 
             playTrack(choco.audio);
@@ -666,6 +637,7 @@
         }
 
         function goBack() {
+            // FIX: Clear the active chocolate when leaving
             currentActiveChocolate = null;
             
             restoreBgMusic();
@@ -697,8 +669,8 @@
                 img.src = c.photo;
                 img.className = 'collage-img';
                 const angle = (i / 7) * Math.PI * 2;
-                img.style.left = (130 + 120 * Math.cos(angle)) + 'px'; // Widened the circle slightly
-                img.style.top = (130 + 120 * Math.sin(angle)) + 'px';
+                img.style.left = (110 + 100 * Math.cos(angle)) + 'px';
+                img.style.top = (110 + 100 * Math.sin(angle)) + 'px';
                 gsap.from(img, { scale: 0, duration: 0.8, delay: i*0.15, ease: "elastic.out(1, 0.5)" });
                 collage.appendChild(img);
             });
