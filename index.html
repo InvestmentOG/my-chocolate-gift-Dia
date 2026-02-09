@@ -26,7 +26,8 @@
             font-family: 'Quicksand', sans-serif;
             background: radial-gradient(circle at 50% 50%, var(--bg-grad-1), var(--bg-grad-2));
             height: 100vh;
-            overflow: hidden;
+            /* Prevent body scroll, we handle scroll inside views */
+            overflow: hidden; 
             color: var(--text);
         }
 
@@ -52,17 +53,19 @@
 
         #app {
             position: relative; width: 100%; height: 100%; z-index: 10;
-            display: flex; justify-content: center; align-items: center;
+            /* Remove flex center here to allow views to manage their own layout */
+            display: block; 
             perspective: 1000px;
         }
 
         .view {
-            position: absolute; width: 100%; height: 100%;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             display: flex; flex-direction: column;
             justify-content: center; align-items: center;
             opacity: 0; pointer-events: none;
             transform-style: preserve-3d;
-            padding: 20px; /* Safety padding */
+            padding: 20px;
+            transition: opacity 0.5s;
         }
         .view.active { opacity: 1; pointer-events: all; }
 
@@ -138,9 +141,9 @@
         }
 
         /* --- CHARACTER (PRANAY) --- */
-        /* MODIFIED: Made smaller (170px -> 110px) to be cuter and less intrusive */
         #pranay-container {
             position: absolute; 
+            /* Initial position off screen to let JS handle it */
             bottom: 20px; right: 20px;
             width: 110px; height: 110px; z-index: 200;
             cursor: pointer;
@@ -175,12 +178,12 @@
         }
 
         .face { position: absolute; top: 40%; width: 100%; text-align: center; }
-        .eyes { display: flex; justify-content: center; gap: 24px; margin-bottom: 8px; } /* Adjusted gap for smaller face */
+        .eyes { display: flex; justify-content: center; gap: 24px; margin-bottom: 8px; }
         .eye { width: 10px; height: 10px; background: #3e3e3e; border-radius: 50%; transition: all 0.2s; }
         .eye.wink { transform: scaleY(0.1); }
         .eye.happy { border-radius: 50%; border-bottom: 2px solid #3e3e3e; background: transparent; height: 6px; width: 10px; transform: translateY(-3px); }
         
-        .cheeks { position: absolute; top: 50%; width: 100%; display: flex; justify-content: center; gap: 45px; } /* Adjusted gap */
+        .cheeks { position: absolute; top: 50%; width: 100%; display: flex; justify-content: center; gap: 45px; }
         .cheek { width: 14px; height: 8px; background: #ffadad; border-radius: 50%; opacity: 0; transition: opacity 0.3s; }
         .cheek.blush { opacity: 0.6; }
 
@@ -190,18 +193,21 @@
         }
         .mouth.laugh { width: 14px; height: 10px; background: #551a1a; border-radius: 0 0 20px 20px; border: none; }
 
-        /* SPEECH BUBBLE */
-        /* MODIFIED: Adjusted size and position logic to prevent off-screen clipping */
+        /* SPEECH BUBBLE - FIXED */
         .speech-bubble {
             position: absolute; 
-            /* Bottom will be set via JS based on character position */
             background: rgba(255, 255, 255, 0.95);
-            padding: 15px 20px;
+            padding: 12px 18px;
             border-radius: 20px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             border: 2px solid var(--accent);
-            min-width: 180px; max-width: 250px; /* Reduced width to fit screen better */
-            font-size: 0.9rem; font-weight: 600; color: var(--text);
+            
+            /* KEY FIX: Constrain width properly */
+            width: max-content;
+            min-width: 140px;
+            max-width: 60vw; /* Prevent it from being wider than screen */
+            
+            font-size: 0.85rem; font-weight: 600; color: var(--text);
             opacity: 0; transform: scale(0.8);
             pointer-events: none;
             transition: all 0.3s;
@@ -214,7 +220,7 @@
             background: #ff4757; 
             color: white; border: none; padding: 10px;
             border-radius: 12px; cursor: pointer; 
-            font-family: 'Quicksand'; font-weight: 700; font-size: 0.95rem;
+            font-family: 'Quicksand'; font-weight: 700; font-size: 0.9rem;
             box-shadow: 0 5px 15px rgba(255, 71, 87, 0.4);
             animation: pulse-btn 2s infinite;
         }
@@ -226,28 +232,28 @@
             text-align: center; margin-bottom: 20px; line-height: 1.2;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
         }
-        #heart-collage { width: 320px; height: 320px; position: relative; margin-bottom: 20px; }
+        #heart-collage { width: 300px; height: 300px; position: relative; margin-bottom: 20px; }
         .collage-img {
-            position: absolute; width: 90px; height: 90px;
+            position: absolute; width: 80px; height: 80px;
             object-fit: cover; border-radius: 50%;
             border: 4px solid white; box-shadow: 0 10px 20px rgba(0,0,0,0.1);
         }
 
-        /* NEW: GLOWING FINAL TRIGGER */
         .final-surprise-trigger {
             font-family: 'Quicksand', sans-serif;
             font-weight: 700;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             color: var(--primary);
             background: rgba(255, 255, 255, 0.8);
-            padding: 15px 30px;
+            padding: 12px 25px;
             border-radius: 50px;
             border: 2px solid var(--gold);
             cursor: pointer;
-            margin-top: 20px;
+            margin-top: 15px;
             text-decoration: none;
             animation: glow-pulse 2s infinite;
             transition: transform 0.3s;
+            text-align: center;
         }
         .final-surprise-trigger:hover { transform: scale(1.05); }
 
@@ -257,37 +263,52 @@
             100% { box-shadow: 0 0 5px var(--gold), 0 0 10px var(--accent); }
         }
 
-        /* NEW: SKETCH SURPRISE VIEW */
+        /* NEW: SKETCH SURPRISE VIEW - FIXED SCROLL & HEIGHT */
         #surprise-view {
             text-align: center;
+            /* CRITICAL FIX: Allow scrolling if text is too long */
+            overflow-y: auto; 
+            justify-content: flex-start; /* Start content at top */
+            padding-top: 50px; 
+            padding-bottom: 100px; /* Space for bunny at bottom */
+            display: block; /* Ensures scroll works better than flex sometimes on mobile */
         }
+        
         #surprise-view h2 {
             font-family: 'Sacramento', cursive;
             color: var(--primary);
-            font-size: 2.8rem;
+            font-size: 2.5rem;
             margin-bottom: 15px;
             text-shadow: 2px 2px 4px rgba(255,255,255,0.8);
+            line-height: 1.2;
+            margin-top: 20px;
         }
+
         .final-sketch {
-            max-width: 95%;
-            max-height: 60vh;
+            max-width: 90%;
+            /* Fix: Limit height to 40% of screen so text fits below */
+            max-height: 40vh; 
             width: auto;
             border-radius: 15px;
             box-shadow: 0 15px 40px rgba(0,0,0,0.2);
-            border: 8px solid white;
-            object-fit: contain; /* Ensures it fits screen */
+            border: 6px solid white;
+            object-fit: contain; 
             margin-bottom: 20px;
+            display: inline-block;
         }
+
         .classy-line {
             font-family: 'Quicksand', sans-serif;
             font-size: 1.1rem;
             color: #555;
             font-style: italic;
-            max-width: 80%;
+            max-width: 85%;
             line-height: 1.6;
-            background: rgba(255,255,255,0.6);
-            padding: 10px 20px;
+            background: rgba(255,255,255,0.7);
+            padding: 20px;
             border-radius: 15px;
+            margin: 0 auto;
+            display: block;
         }
 
         /* PROGRESS HEARTS */
@@ -427,25 +448,27 @@
         }
         setInterval(createRain, 300);
 
-        // --- TELEPORT LOGIC (UPDATED FOR SMALLER BUNNY) ---
+        // --- TELEPORT LOGIC (FIXED FOR BUBBLE OVERFLOW) ---
         let currentPosIndex = 0; 
         
         function teleportCharacter() {
-            // UPDATED POSITIONS: Since bunny is smaller (110px), 
-            // Bubble positions are tighter to prevent off-screen overflow.
+            // Updated coordinates so bubble never flows off screen
             const positions = [
-                // Bottom Right
+                // Bottom Right -> Bubble anchors Right (grows left)
                 { bottom: '20px', right: '20px', left: 'auto', top: 'auto', 
-                  bubbleBot: '130px', bubbleRight: '0px', bubbleLeft: 'auto' }, 
-                // Bottom Left
+                  bubbleAnchor: 'right' }, 
+                  
+                // Bottom Left -> Bubble anchors Left (grows right)
                 { bottom: '20px', left: '20px', right: 'auto', top: 'auto', 
-                  bubbleBot: '130px', bubbleLeft: '0px', bubbleRight: 'auto' }, 
-                // Top Right
+                  bubbleAnchor: 'left' }, 
+                  
+                // Top Right -> Bubble anchors Right (grows left), Top
                 { top: '80px', right: '20px', left: 'auto', bottom: 'auto', 
-                  bubbleBot: '-110px', bubbleRight: '0px', bubbleLeft: 'auto' }, 
-                // Top Left
+                  bubbleAnchor: 'right' }, 
+                  
+                // Top Left -> Bubble anchors Left (grows right), Top
                 { top: '80px', left: '20px', right: 'auto', bottom: 'auto', 
-                  bubbleBot: '-110px', bubbleLeft: '0px', bubbleRight: 'auto' }  
+                  bubbleAnchor: 'left' } 
             ];
 
             let nextIndex;
@@ -457,20 +480,32 @@
             const pos = positions[currentPosIndex];
 
             gsap.to(character, { scale: 0, duration: 0.2, onComplete: () => {
+                // Set character position
                 character.style.bottom = pos.bottom;
                 character.style.top = pos.top;
                 character.style.left = pos.left;
                 character.style.right = pos.right;
                 
-                bubble.style.bottom = pos.bubbleBot;
-                bubble.style.left = pos.bubbleLeft;
-                bubble.style.right = pos.bubbleRight;
-
-                // Adjust text alignment in bubble based on side
-                if(pos.left === '20px') {
-                    bubble.style.transformOrigin = "bottom left";
-                } else {
+                // Set Bubble Alignment based on side
+                if(pos.bubbleAnchor === 'right') {
+                    // Bunny is on right, anchor bubble right so it grows left
+                    bubble.style.right = '0px'; 
+                    bubble.style.left = 'auto';
                     bubble.style.transformOrigin = "bottom right";
+                } else {
+                    // Bunny is on left, anchor bubble left so it grows right
+                    bubble.style.left = '0px'; 
+                    bubble.style.right = 'auto';
+                    bubble.style.transformOrigin = "bottom left";
+                }
+
+                // Handle vertical position (if bunny is at top, put bubble below him)
+                if(pos.top !== 'auto') {
+                    bubble.style.bottom = 'auto';
+                    bubble.style.top = '120px';
+                } else {
+                    bubble.style.top = 'auto';
+                    bubble.style.bottom = '130px';
                 }
 
                 gsap.to(character, { scale: 1, duration: 0.3, ease: "back.out(1.7)" });
@@ -607,11 +642,17 @@
             document.getElementById('intro-view').style.opacity = 0;
             setTimeout(() => document.getElementById('intro-view').style.display='none', 1000);
 
+            // Manual initial set to bottom right
             gsap.to(character, { bottom: '20px', right: '20px', duration: 1.2, ease: "back.out(1.7)" });
             
+            // Set initial bubble state for bottom-right
+            bubble.style.right = '0px'; 
+            bubble.style.left = 'auto';
+            bubble.style.transformOrigin = "bottom right";
+
             setTimeout(() => {
-                say("Hi! I'm Pranay, your tiny guide! 🎩", {
-                    text: "Hey Pranay! What's this? 👋", 
+                say("Hi! I'm Pranay, your chocolate store guide! 🎩", {
+                    text: "Click here Dia to enter and discover the magic basket! 👋", 
                     action: () => {
                         setEmotion('happy');
                         say("I've hidden 7 special surprises for you. Ready?", {
@@ -756,15 +797,13 @@
                 collage.appendChild(img);
             });
 
-            // Hide the guide for the finale to focus on the content
             gsap.to(character, { scale: 0, duration: 0.5 });
         }
 
-        // --- NEW FUNCTION: REVEAL FINAL SURPRISE ---
+        // --- REVEAL FINAL SURPRISE ---
         function revealFinalSurprise() {
             switchView('surprise-view');
             
-            // Re-trigger confetti for the sketch reveal
             confetti({
                 particleCount: 150,
                 spread: 100,
@@ -772,7 +811,6 @@
                 colors: ['#ffc857', '#ff8fab', '#ffffff']
             });
 
-            // Bring the character back for one last smile
             gsap.to(character, { scale: 1, duration: 0.5, delay: 1 });
             setTimeout(() => {
                 setEmotion('love');
